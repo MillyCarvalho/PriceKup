@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceKup - Gestão Inteligente para Confeitarias e Negócios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5f3ff; }
+        .fade-in { animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- Notificações Flutuantes -->
+    <div id="notification" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg hidden z-50 text-white font-medium transition-all text-sm"></div>
+
+    <!-- ECRÃ DE AUTENTICAÇÃO -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-purple-100 overflow-hidden grid grid-cols-1 md:grid-cols-2">
+            
+            <div class="bg-gradient-to-br from-purple-600 via-indigo-700 to-purple-900 p-10 flex flex-col justify-between text-white relative">
+                <div class="relative z-10 flex items-center gap-3">
+                    <div class="bg-white p-2.5 rounded-2xl shadow-md text-purple-700">
+                        <i class="fa-solid fa-chart-line text-2xl"></i>
+                    </div>
+                    <span class="text-2xl font-bold tracking-wider">PriceKup</span>
+                </div>
+                <div class="my-12 relative z-10">
+                    <h2 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">Transformamos números em crescimento! ✨</h2>
+                    <p class="text-purple-100 text-sm md:text-base font-light">Planeie, calcule ingredientes e controle as suas vendas com segurança total.</p>
+                </div>
+                <div class="text-xs text-purple-200 relative z-10">© 2026 PriceKup.</div>
+            </div>
+
+            <div class="p-8 md:p-12 flex flex-col justify-center bg-white">
+                
+                <!-- LOGIN -->
+                <div id="login-container" class="space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Iniciar Sessão</h3>
+                        <p class="text-slate-500 text-sm">Insira os seus dados para aceder à sua conta.</p>
+                    </div>
+
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                            <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="exemplo@pricekup.com">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Senha</label>
+                                <button type="button" onclick="openForgotModal()" class="text-xs text-purple-600 font-semibold hover:underline">Esqueceu a senha?</button>
+                            </div>
+                            <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg text-sm">Entrar</button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <p class="text-slate-500 text-xs">Não tem uma conta? <button type="button" id="btn-show-register" class="text-purple-600 font-bold hover:underline ml-1">Registe-se aqui</button></p>
+                    </div>
+                </div>
+
+                <!-- REGISTO -->
+                <div id="register-container" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Criar Conta</h3>
+                        <p class="text-slate-500 text-sm">Registe o seu e-mail para começar a usar.</p>
+                    </div>
+
+                    <form id="register-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nome do Negócio</label>
+                            <input type="text" id="reg-name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="A sua Confeitaria">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                            <input type="email" id="reg-email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="exemplo@pricekup.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Senha</label>
+                            <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg text-sm">Concluir Registo</button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <p class="text-slate-500 text-xs">Já tem conta? <button type="button" id="btn-show-login" class="text-purple-600 font-bold hover:underline ml-1">Iniciar sessão</button></p>
+                    </div>
+                </div>
+
+                <!-- INTRODUZIR CÓDIGO E NOVA SENHA -->
+                <div id="reset-code-container" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Redefinir Senha</h3>
+                        <p class="text-slate-500 text-sm">Insira o código enviado pelo administrador e a sua nova senha.</p>
+                    </div>
+
+                    <form id="reset-code-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                            <input type="email" id="res-email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="exemplo@pricekup.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Código de 6 Dígitos</label>
+                            <input type="text" id="res-code" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm tracking-widest font-bold" placeholder="123456">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nova Senha</label>
+                            <input type="password" id="res-new-password" required minlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg text-sm">Atualizar Senha</button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <button type="button" id="btn-back-to-login" class="text-slate-500 text-xs hover:text-purple-600 font-semibold">Voltar ao início de sessão</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ECRÃ PRINCIPAL DA APLICAÇÃO -->
+    <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col justify-between p-6 shrink-0 shadow-xl">
+            <div>
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="bg-purple-600 p-2 rounded-xl text-white">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <span class="font-bold text-lg tracking-wider">PriceKup</span>
+                </div>
+                
+                <div class="mb-6 px-3 py-2.5 bg-slate-800 rounded-xl border border-slate-700">
+                    <p id="user-display-name" class="text-sm font-semibold text-purple-300 truncate">Utilizador</p>
+                    <p class="text-xs text-slate-400 truncate" id="user-display-email">email@dominio.com</p>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-purple-600 text-white shadow-md">
+                        <i class="fa-solid fa-house w-5"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('ingredients')" id="nav-ingredients" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-wheat-awn w-5"></i> Ingredientes
+                    </button>
+                    <button onclick="switchTab('recipes')" id="nav-recipes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-book-open w-5"></i> Fichas Técnicas
+                    </button>
+                    <button onclick="switchTab('sales')" id="nav-sales" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-cash-register w-5"></i> Vendas
+                    </button>
+                    <button onclick="switchTab('profile')" id="nav-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-user-gear w-5"></i> Meu Perfil
+                    </button>
+                    <button onclick="switchTab('admin')" id="nav-admin" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-shield-halved w-5"></i> Painel Admin
+                    </button>
+                </nav>
+            </div>
+
+            <div class="pt-6 border-t border-slate-800">
+                <button id="btn-logout" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Terminar Sessão
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            
+            <!-- 1. DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6 fade-in">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Visão Geral</h2>
+                    <p class="text-slate-500 text-sm mt-1">Acompanhe o desempenho do seu negócio em tempo real.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 flex items-center gap-4">
+                        <div class="bg-purple-100 text-purple-600 p-4 rounded-2xl text-xl"><i class="fa-solid fa-wheat-awn"></i></div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ingredientes Registados</p>
+                            <h3 id="stat-ingredients" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 flex items-center gap-4">
+                        <div class="bg-indigo-100 text-indigo-600 p-4 rounded-2xl text-xl"><i class="fa-solid fa-book-open"></i></div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Fichas Técnicas</p>
+                            <h3 id="stat-recipes" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 flex items-center gap-4">
+                        <div class="bg-emerald-100 text-emerald-600 p-4 rounded-2xl text-xl"><i class="fa-solid fa-cash-register"></i></div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Vendas Registadas</p>
+                            <h3 id="stat-sales" class="text-2xl font-bold text-slate-900 mt-0.5">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. INGREDIENTES -->
+            <div id="tab-ingredients" class="hidden space-y-6 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Ingredientes</h2>
+                        <p class="text-slate-500 text-sm mt-1">Registe o custo dos seus insumos para uso nas receitas.</p>
+                    </div>
+                    <button onclick="openIngredientModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-md text-sm flex items-center gap-2 w-fit">
+                        <i class="fa-solid fa-plus"></i> Novo Ingrediente
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="p-4">Nome</th>
+                                    <th class="p-4">Embalagem</th>
+                                    <th class="p-4">Preço (R$)</th>
+                                    <th class="p-4 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ingredients-table-body" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhum ingrediente registado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. FICHAS TÉCNICAS -->
+            <div id="tab-recipes" class="hidden space-y-6 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Fichas Técnicas & Custos</h2>
+                        <p class="text-slate-500 text-sm mt-1">Calcule o custo exato de fabrico dos seus produtos.</p>
+                    </div>
+                    <button onclick="openRecipeModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-md text-sm flex items-center gap-2 w-fit">
+                        <i class="fa-solid fa-plus"></i> Nova Ficha Técnica
+                    </button>
+                </div>
+
+                <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 col-span-full text-center text-slate-400 py-10">
+                        Nenhuma ficha técnica criada.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. VENDAS -->
+            <div id="tab-sales" class="hidden space-y-6 fade-in">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Registo de Vendas</h2>
+                        <p class="text-slate-500 text-sm mt-1">Registe as suas encomendas e saídas diárias.</p>
+                    </div>
+                    <button onclick="openSaleModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-md text-sm flex items-center gap-2 w-fit">
+                        <i class="fa-solid fa-plus"></i> Registar Venda
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="p-4">Produto/Cliente</th>
+                                    <th class="p-4">Qtd</th>
+                                    <th class="p-4">Valor Total (R$)</th>
+                                    <th class="p-4 text-right">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma venda registada.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. PERFIL -->
+            <div id="tab-profile" class="hidden space-y-6 fade-in">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Meu Perfil</h2>
+                    <p class="text-slate-500 text-sm mt-1">Gira as informações do seu negócio e segurança.</p>
+                </div>
+
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-purple-100 max-w-2xl">
+                    <form id="profile-form" class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nome do Negócio</label>
+                            <input type="text" id="prof-name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail (Acesso)</label>
+                            <input type="email" id="prof-email" readonly class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 outline-none text-sm text-slate-500 cursor-not-allowed">
+                            <p class="text-xs text-slate-400 mt-1">O e-mail não pode ser alterado, pois é a sua chave de acesso.</p>
+                        </div>
+                        
+                        <div class="pt-4 mt-2 border-t border-slate-100">
+                            <h4 class="font-bold text-slate-800 mb-3 text-sm">Segurança da Conta</h4>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nova Senha (opcional)</label>
+                            <input type="password" id="prof-password" minlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="Deixe em branco para manter a atual">
+                        </div>
+                        
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Guardar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 6. PAINEL ADMIN -->
+            <div id="tab-admin" class="hidden space-y-8 fade-in">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Painel de Administrador 🛡️</h2>
+                    <p class="text-slate-500 text-sm mt-1">Área exclusiva para gestão global do sistema e recuperação de acessos.</p>
+                </div>
+
+                <!-- Pedidos de Recuperação -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-key text-purple-600"></i> Pedidos de Recuperação de Senha</h3>
+                    <p class="text-xs text-slate-500">Quando um utilizador pedir nova senha, o código aparecerá aqui para lhe enviares por e-mail.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="p-4">E-mail do Utilizador</th>
+                                    <th class="p-4">Código Gerado</th>
+                                    <th class="p-4 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-recovery-table" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum pedido pendente.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lista de Utilizadores -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Utilizadores Registados no Sistema</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="p-4">Nome do Negócio</th>
+                                    <th class="p-4">E-mail</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="2" class="p-6 text-center text-slate-400">A carregar utilizadores...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL ESQUECI A SENHA -->
+    <div id="forgot-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-purple-100 space-y-5 fade-in">
+            <h3 class="text-xl font-bold text-slate-900">Recuperar Senha</h3>
+            <p class="text-xs text-slate-500">Insira o seu e-mail. O sistema irá gerar um código de 6 dígitos que deverá solicitar ao administrador.</p>
+            <form id="forgot-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                    <input type="email" id="forgot-email" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="exemplo@pricekup.com">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeForgotModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-all">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">Gerar Código</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL INGREDIENTE -->
+    <div id="ingredient-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-purple-100 space-y-5 fade-in">
+            <h3 class="text-xl font-bold text-slate-900">Adicionar Ingrediente</h3>
+            <form id="ingredient-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nome do Ingrediente</label>
+                    <input type="text" id="ing-name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: Farinha de Trigo">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Embalagem (g / ml)</label>
+                        <input type="number" step="any" id="ing-pkg" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: 1000">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Preço Pago (R$)</label>
+                        <input type="number" step="any" id="ing-price" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: 6.50">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeIngredientModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-all">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FICHA TÉCNICA -->
+    <div id="recipe-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-purple-100 space-y-5 fade-in">
+            <h3 class="text-xl font-bold text-slate-900">Nova Ficha Técnica</h3>
+            <form id="recipe-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nome da Receita</label>
+                    <input type="text" id="rec-name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: Bolo de Chocolate">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Custo Total dos Ingredientes (R$)</label>
+                    <input type="number" step="any" id="rec-cost" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: 25.00">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Preço de Venda Sugerido (R$)</label>
+                    <input type="number" step="any" id="rec-price" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: 60.00">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeRecipeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-all">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VENDA -->
+    <div id="sale-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-purple-100 space-y-5 fade-in">
+            <h3 class="text-xl font-bold text-slate-900">Registar Venda</h3>
+            <form id="sale-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Produto / Cliente</label>
+                    <input type="text" id="sale-item" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: Bolo Especial - Ana Maria">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Quantidade</label>
+                        <input type="number" id="sale-qty" required value="1" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Valor Total (R$)</label>
+                        <input type="number" step="any" id="sale-total" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="Ex: 60.00">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeSaleModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-all">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        const ADMIN_EMAIL = "pricekup@outlook.com";
+        const ADMIN_DEFAULT_PASSWORD = "Admin123*";
+
+        function showNotification(msg, isError = false) {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg z-50 text-white font-medium transition-all text-sm ${isError ? 'bg-red-600' : 'bg-purple-600'}`;
+            notif.classList.remove('hidden');
+            setTimeout(() => notif.classList.add('hidden'), 3500);
+        }
+
+        // Sistema de Abas
+        function switchTab(tabId) {
+            ['dashboard', 'ingredients', 'recipes', 'sales', 'profile', 'admin'].forEach(t => {
+                const tabEl = document.getElementById(`tab-${t}`);
+                const navEl = document.getElementById(`nav-${t}`);
+                if (tabEl) tabEl.classList.add('hidden');
+                
+                if (navEl && t !== 'admin') {
+                    navEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white";
+                } else if (navEl && t === 'admin' && currentUser && currentUser.email === ADMIN_EMAIL) {
+                    navEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white";
+                }
+            });
+            
+            const selectedTab = document.getElementById(`tab-${tabId}`);
+            if (selectedTab) selectedTab.classList.remove('hidden');
+            
+            const selectedNav = document.getElementById(`nav-${tabId}`);
+            if (selectedNav) {
+                selectedNav.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-purple-600 text-white shadow-md";
+            }
+        }
+
+        // Navegação Auth & Recuperação
+        document.getElementById('btn-show-register')?.addEventListener('click', () => {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('register-container').classList.remove('hidden');
+        });
+        document.getElementById('btn-show-login')?.addEventListener('click', () => {
+            document.getElementById('register-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+        });
+        document.getElementById('btn-back-to-login')?.addEventListener('click', () => {
+            document.getElementById('reset-code-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+        });
+
+        function openForgotModal() { document.getElementById('forgot-modal').classList.remove('hidden'); document.getElementById('forgot-modal').classList.add('flex'); }
+        function closeForgotModal() { document.getElementById('forgot-modal').classList.add('hidden'); document.getElementById('forgot-modal').classList.remove('flex'); document.getElementById('forgot-form').reset(); }
+
+        // Pedir Recuperação de Senha
+        document.getElementById('forgot-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            
+            if (!users[email] && email !== ADMIN_EMAIL) {
+                showNotification("Este e-mail não está registado no sistema.", true);
+                return;
+            }
+
+            const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            let recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
+            recoveryRequests[email] = { email, code: recoveryCode, date: new Date().toLocaleDateString('pt-PT') };
+            localStorage.setItem('pricekup_recovery_requests', JSON.stringify(recoveryRequests));
+
+            closeForgotModal();
+            
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('reset-code-container').classList.remove('hidden');
+            document.getElementById('res-email').value = email;
+            
+            showNotification("Código gerado! Solicite o código ao administrador.");
+            
+            if (currentUser && currentUser.email === ADMIN_EMAIL) {
+                loadAdminData();
+            }
+        });
+
+        // Validar código e redefinir senha a partir do ecrã principal
+        document.getElementById('reset-code-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('res-email').value.trim().toLowerCase();
+            const codeInput = document.getElementById('res-code').value.trim();
+            const newPassword = document.getElementById('res-new-password').value;
+
+            let recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
+            if (!recoveryRequests[email] || recoveryRequests[email].code !== codeInput) {
+                showNotification("Código de recuperação inválido!", true);
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            if (email === ADMIN_EMAIL && !users[ADMIN_EMAIL]) {
+                users[ADMIN_EMAIL] = { name: "Administrador PriceKup", email: ADMIN_EMAIL, password: newPassword };
+            } else if (users[email]) {
+                users[email].password = newPassword;
+            }
+            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
+
+            delete recoveryRequests[email];
+            localStorage.setItem('pricekup_recovery_requests', JSON.stringify(recoveryRequests));
+
+            document.getElementById('reset-code-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('reset-code-form').reset();
+            showNotification("Senha alterada com sucesso! Já pode entrar.");
+        });
+
+        // Atualizar Perfil
+        document.getElementById('profile-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('prof-name').value.trim();
+            const newPassword = document.getElementById('prof-password').value;
+
+            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            
+            // Atualiza os dados do utilizador atual
+            currentUser.name = newName;
+            if (newPassword) {
+                currentUser.password = newPassword;
+            }
+
+            // Grava na base de dados (localStorage)
+            users[currentUser.email] = currentUser;
+            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
+            localStorage.setItem('pricekup_active_user', JSON.stringify(currentUser));
+
+            // Atualiza Interface
+            document.getElementById('user-display-name').textContent = currentUser.name;
+            document.getElementById('prof-password').value = ''; // Limpa o campo da senha
+            
+            showNotification("Perfil atualizado com sucesso!");
+        });
+
+        // Registo
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+
+            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            if (users[email]) {
+                showNotification("Este e-mail já tem conta criada!", true);
+                return;
+            }
+
+            users[email] = { name, email, password };
+            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
+            showNotification("Conta criada com sucesso! Faça login.");
+            
+            document.getElementById('register-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('register-form').reset();
+        });
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            
+            if (email === ADMIN_EMAIL && !users[ADMIN_EMAIL]) {
+                users[ADMIN_EMAIL] = { name: "Administrador PriceKup", email: ADMIN_EMAIL, password: ADMIN_DEFAULT_PASSWORD };
+                localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
+            }
+
+            if (!users[email]) {
+                showNotification("Erro: Conta não encontrada. Registe-se primeiro!", true);
+                return;
+            }
+            if (users[email].password !== password) {
+                showNotification("Erro: Senha incorreta!", true);
+                return;
+            }
+
+            currentUser = users[email];
+            localStorage.setItem('pricekup_active_user', JSON.stringify(currentUser));
+            startApp();
+        });
+
+        function startApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            
+            // Popula dados do utilizador na UI
+            document.getElementById('user-display-name').textContent = currentUser.name;
+            document.getElementById('user-display-email').textContent = currentUser.email;
+            
+            // Popula dados no formulário de Perfil
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-email').value = currentUser.email;
+
+            const adminNav = document.getElementById('nav-admin');
+            if (currentUser.email === ADMIN_EMAIL) {
+                adminNav.classList.remove('hidden');
+                loadAdminData();
+            } else {
+                adminNav.classList.add('hidden');
+            }
+
+            loadUserData();
+            showNotification(`Sessão iniciada como ${currentUser.name}!`);
+        }
+
+        function loadAdminData() {
+            const users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
+            const adminTable = document.getElementById('admin-users-table');
+            const userKeys = Object.keys(users);
+            
+            if (userKeys.length === 0) {
+                adminTable.innerHTML = '<tr><td colspan="2" class="p-6 text-center text-slate-400">Nenhum utilizador encontrado.</td></tr>';
+            } else {
+                adminTable.innerHTML = userKeys.map(email => {
+                    const u = users[email];
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-4 font-medium text-slate-900">${u.name}</td>
+                            <td class="p-4 text-slate-600">${u.email}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            const recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
+            const recoveryTable = document.getElementById('admin-recovery-table');
+            const reqKeys = Object.keys(recoveryRequests);
+
+            if (reqKeys.length === 0) {
+                recoveryTable.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum pedido pendente.</td></tr>';
+            } else {
+                recoveryTable.innerHTML = reqKeys.map(email => {
+                    const req = recoveryRequests[email];
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-4 font-medium text-slate-900">${req.email}</td>
+                            <td class="p-4"><span class="bg-purple-100 text-purple-700 font-mono font-bold px-2.5 py-1 rounded-lg">${req.code}</span></td>
+                            <td class="p-4 text-right">
+                                <span class="text-xs text-slate-500 font-medium">Copie e envie por e-mail</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            localStorage.removeItem('pricekup_active_user');
+            currentUser = null;
+            document.getElementById('app-screen').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+            // Reseta a tab para o dashboard na próxima vez
+            switchTab('dashboard'); 
+            showNotification("Sessão terminada.");
+        });
+
+        // Modais Padrão
+        function openIngredientModal() { document.getElementById('ingredient-modal').classList.remove('hidden'); document.getElementById('ingredient-modal').classList.add('flex'); }
+        function closeIngredientModal() { document.getElementById('ingredient-modal').classList.add('hidden'); document.getElementById('ingredient-modal').classList.remove('flex'); document.getElementById('ingredient-form').reset(); }
+        
+        function openRecipeModal() { document.getElementById('recipe-modal').classList.remove('hidden'); document.getElementById('recipe-modal').classList.add('flex'); }
+        function closeRecipeModal() { document.getElementById('recipe-modal').classList.add('hidden'); document.getElementById('recipe-modal').classList.remove('flex'); document.getElementById('recipe-form').reset(); }
+        
+        function openSaleModal() { document.getElementById('sale-modal').classList.remove('hidden'); document.getElementById('sale-modal').classList.add('flex'); }
+        function closeSaleModal() { document.getElementById('sale-modal').classList.add('hidden'); document.getElementById('sale-modal').classList.remove('flex'); document.getElementById('sale-form').reset(); }
+
+        function getUserKey(key) {
+            return `pricekup_${currentUser.email}_${key}`;
+        }
+
+        function loadUserData() {
+            const ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
+            const recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
+            const sales = JSON.parse(localStorage.getItem(getUserKey('sales'))) || [];
+
+            document.getElementById('stat-ingredients').textContent = ingredients.length;
+            document.getElementById('stat-recipes').textContent = recipes.length;
+            document.getElementById('stat-sales').textContent = sales.length;
+
+            const ingBody = document.getElementById('ingredients-table-body');
+            if (ingredients.length === 0) {
+                ingBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhum ingrediente registado.</td></tr>';
+            } else {
+                ingBody.innerHTML = ingredients.map((ing, index) => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-medium text-slate-900">${ing.name}</td>
+                        <td class="p-4 text-slate-600">${ing.pkg}</td>
+                        <td class="p-4 text-slate-600">R$ ${parseFloat(ing.price).toFixed(2)}</td>
+                        <td class="p-4 text-right"><button onclick="deleteIngredient(${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            const recGrid = document.getElementById('recipes-grid');
+            if (recipes.length === 0) {
+                recGrid.innerHTML = '<div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 col-span-full text-center text-slate-400 py-10">Nenhuma ficha técnica criada.</div>';
+            } else {
+                recGrid.innerHTML = recipes.map((rec, index) => `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-slate-900 text-lg">${rec.name}</h4>
+                            <button onclick="deleteRecipe(${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 pt-2 text-sm">
+                            <div class="bg-slate-50 p-3 rounded-xl">
+                                <span class="text-xs text-slate-400 block font-semibold uppercase">Custo</span>
+                                <span class="font-bold text-slate-700">R$ ${parseFloat(rec.cost).toFixed(2)}</span>
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded-xl">
+                                <span class="text-xs text-purple-400 block font-semibold uppercase">Venda Sugerida</span>
+                                <span class="font-bold text-purple-700">R$ ${parseFloat(rec.price).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const salesBody = document.getElementById('sales-table-body');
+            if (sales.length === 0) {
+                salesBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma venda registada.</td></tr>';
+            } else {
+                salesBody.innerHTML = sales.map((sale, index) => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4 font-medium text-slate-900">${sale.item}</td>
+                        <td class="p-4 text-slate-600">${sale.qty}</td>
+                        <td class="p-4 font-semibold text-emerald-600">R$ ${parseFloat(sale.total).toFixed(2)}</td>
+                        <td class="p-4 text-right text-slate-400 text-xs">${sale.date}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        document.getElementById('ingredient-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('ing-name').value.trim();
+            const pkg = document.getElementById('ing-pkg').value;
+            const price = document.getElementById('ing-price').value;
+
+            let ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
+            ingredients.push({ name, pkg, price });
+            localStorage.setItem(getUserKey('ingredients'), JSON.stringify(ingredients));
+
+            closeIngredientModal();
+            loadUserData();
+            showNotification("Ingrediente adicionado com sucesso!");
+        });
+
+        function deleteIngredient(index) {
+            let ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
+            ingredients.splice(index, 1);
+            localStorage.setItem(getUserKey('ingredients'), JSON.stringify(ingredients));
+            loadUserData();
+            showNotification("Ingrediente removido.");
+        }
+
+        document.getElementById('recipe-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('rec-name').value.trim();
+            const cost = document.getElementById('rec-cost').value;
+            const price = document.getElementById('rec-price').value;
+
+            let recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
+            recipes.push({ name, cost, price });
+            localStorage.setItem(getUserKey('recipes'), JSON.stringify(recipes));
+
+            closeRecipeModal();
+            loadUserData();
+            showNotification("Ficha técnica criada com sucesso!");
+        });
+
+        function deleteRecipe(index) {
+            let recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
+            recipes.splice(index, 1);
+            localStorage.setItem(getUserKey('recipes'), JSON.stringify(recipes));
+            loadUserData();
+            showNotification("Ficha técnica removida.");
+        }
+
+        document.getElementById('sale-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const item = document.getElementById('sale-item').value.trim();
+            const qty = document.getElementById('sale-qty').value;
+            const total = document.getElementById('sale-total').value;
+            const date = new Date().toLocaleDateString('pt-PT');
+
+            let sales = JSON.parse(localStorage.getItem(getUserKey('sales'))) || [];
+            sales.push({ item, qty, total, date });
+            localStorage.setItem(getUserKey('sales'), JSON.stringify(sales));
+
+            closeSaleModal();
+            loadUserData();
+            showNotification("Venda registada com sucesso!");
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeUser = JSON.parse(localStorage.getItem('pricekup_active_user'));
+            if (activeUser) {
+                currentUser = activeUser;
+                startApp();
+            }
+        });
+    </script>
+</body>
+</html>
