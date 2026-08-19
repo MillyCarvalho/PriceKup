@@ -7,7 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f3ff; }
         .fade-in { animation: fadeIn 0.25s ease-in-out; }
@@ -32,7 +33,7 @@
                 </div>
                 <div class="my-12 relative z-10">
                     <h2 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">Transformamos números em crescimento! ✨</h2>
-                    <p class="text-purple-100 text-sm md:text-base font-light">Planeie, calcule ingredientes e controle as suas vendas com segurança total.</p>
+                    <p class="text-purple-100 text-sm md:text-base font-light">Planeie, calcule ingredientes e controle as suas vendas com segurança na nuvem.</p>
                 </div>
                 <div class="text-xs text-purple-200 relative z-10">© 2026 PriceKup.</div>
             </div>
@@ -54,7 +55,6 @@
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Senha</label>
-                                <button type="button" onclick="openForgotModal()" class="text-xs text-purple-600 font-semibold hover:underline">Esqueceu a senha?</button>
                             </div>
                             <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="••••••••">
                         </div>
@@ -94,34 +94,6 @@
                     </div>
                 </div>
 
-                <!-- INTRODUZIR CÓDIGO E NOVA SENHA -->
-                <div id="reset-code-container" class="hidden space-y-6">
-                    <div>
-                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Redefinir Senha</h3>
-                        <p class="text-slate-500 text-sm">Insira o código enviado pelo administrador e a sua nova senha.</p>
-                    </div>
-
-                    <form id="reset-code-form" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
-                            <input type="email" id="res-email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="exemplo@pricekup.com">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Código de 6 Dígitos</label>
-                            <input type="text" id="res-code" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm tracking-widest font-bold" placeholder="123456">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nova Senha</label>
-                            <input type="password" id="res-new-password" required minlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 outline-none text-sm" placeholder="••••••••">
-                        </div>
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg text-sm">Atualizar Senha</button>
-                    </form>
-
-                    <div class="text-center pt-2">
-                        <button type="button" id="btn-back-to-login" class="text-slate-500 text-xs hover:text-purple-600 font-semibold">Voltar ao início de sessão</button>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -158,9 +130,6 @@
                     </button>
                     <button onclick="switchTab('profile')" id="nav-profile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
                         <i class="fa-solid fa-user-gear w-5"></i> Meu Perfil
-                    </button>
-                    <button onclick="switchTab('admin')" id="nav-admin" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-shield-halved w-5"></i> Painel Admin
                     </button>
                 </nav>
             </div>
@@ -231,7 +200,7 @@
                                 </tr>
                             </thead>
                             <tbody id="ingredients-table-body" class="divide-y divide-slate-100 text-sm">
-                                <tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhum ingrediente registado.</td></tr>
+                                <tr><td colspan="4" class="p-6 text-center text-slate-400">A carregar...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -252,7 +221,7 @@
 
                 <div id="recipes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 col-span-full text-center text-slate-400 py-10">
-                        Nenhuma ficha técnica criada.
+                        A carregar...
                     </div>
                 </div>
             </div>
@@ -281,7 +250,7 @@
                                 </tr>
                             </thead>
                             <tbody id="sales-table-body" class="divide-y divide-slate-100 text-sm">
-                                <tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma venda registada.</td></tr>
+                                <tr><td colspan="4" class="p-6 text-center text-slate-400">A carregar...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -304,7 +273,6 @@
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail (Acesso)</label>
                             <input type="email" id="prof-email" readonly class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 outline-none text-sm text-slate-500 cursor-not-allowed">
-                            <p class="text-xs text-slate-400 mt-1">O e-mail não pode ser alterado, pois é a sua chave de acesso.</p>
                         </div>
                         
                         <div class="pt-4 mt-2 border-t border-slate-100">
@@ -322,71 +290,7 @@
                 </div>
             </div>
 
-            <!-- 6. PAINEL ADMIN -->
-            <div id="tab-admin" class="hidden space-y-8 fade-in">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Painel de Administrador 🛡️</h2>
-                    <p class="text-slate-500 text-sm mt-1">Área exclusiva para gestão global do sistema e recuperação de acessos.</p>
-                </div>
-
-                <!-- Pedidos de Recuperação -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
-                    <h3 class="font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-key text-purple-600"></i> Pedidos de Recuperação de Senha</h3>
-                    <p class="text-xs text-slate-500">Quando um utilizador pedir nova senha, o código aparecerá aqui para lhe enviares por e-mail.</p>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                    <th class="p-4">E-mail do Utilizador</th>
-                                    <th class="p-4">Código Gerado</th>
-                                    <th class="p-4 text-right">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-recovery-table" class="divide-y divide-slate-100 text-sm">
-                                <tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum pedido pendente.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Lista de Utilizadores -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
-                    <h3 class="font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Utilizadores Registados no Sistema</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                    <th class="p-4">Nome do Negócio</th>
-                                    <th class="p-4">E-mail</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-users-table" class="divide-y divide-slate-100 text-sm">
-                                <tr><td colspan="2" class="p-6 text-center text-slate-400">A carregar utilizadores...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
         </main>
-    </div>
-
-    <!-- MODAL ESQUECI A SENHA -->
-    <div id="forgot-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-purple-100 space-y-5 fade-in">
-            <h3 class="text-xl font-bold text-slate-900">Recuperar Senha</h3>
-            <p class="text-xs text-slate-500">Insira o seu e-mail. O sistema irá gerar um código de 6 dígitos que deverá solicitar ao administrador.</p>
-            <form id="forgot-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
-                    <input type="email" id="forgot-email" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-purple-600" placeholder="exemplo@pricekup.com">
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeForgotModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-all">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">Gerar Código</button>
-                </div>
-            </form>
-        </div>
     </div>
 
     <!-- MODAL INGREDIENTE -->
@@ -469,9 +373,12 @@
     </div>
 
     <script>
+        // CONFIGURAÇÃO SUPABASE (Substitua pelos dados do seu painel do Supabase)
+        const SUPABASE_URL = 'https://cdhvbfbjxydpmfouubwh.supabase.co/rest/v1/';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkaHZiZmJqeHlkcG1mb3V1YndoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzE2NTgwMSwiZXhwIjoyMTAyNzQxODAxfQ.tCMHyCcqYE7dqVpI-WWywJlLkCx5YHk5B0HDXBaWuwo';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
-        const ADMIN_EMAIL = "pricekup@outlook.com";
-        const ADMIN_DEFAULT_PASSWORD = "Admin123*";
 
         function showNotification(msg, isError = false) {
             const notif = document.getElementById('notification');
@@ -483,28 +390,18 @@
 
         // Sistema de Abas
         function switchTab(tabId) {
-            ['dashboard', 'ingredients', 'recipes', 'sales', 'profile', 'admin'].forEach(t => {
+            ['dashboard', 'ingredients', 'recipes', 'sales', 'profile'].forEach(t => {
                 const tabEl = document.getElementById(`tab-${t}`);
                 const navEl = document.getElementById(`nav-${t}`);
                 if (tabEl) tabEl.classList.add('hidden');
-                
-                if (navEl && t !== 'admin') {
-                    navEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white";
-                } else if (navEl && t === 'admin' && currentUser && currentUser.email === ADMIN_EMAIL) {
-                    navEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white";
-                }
+                if (navEl) navEl.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white";
             });
             
-            const selectedTab = document.getElementById(`tab-${tabId}`);
-            if (selectedTab) selectedTab.classList.remove('hidden');
-            
-            const selectedNav = document.getElementById(`nav-${tabId}`);
-            if (selectedNav) {
-                selectedNav.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-purple-600 text-white shadow-md";
-            }
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-purple-600 text-white shadow-md";
         }
 
-        // Navegação Auth & Recuperação
+        // Navegação Auth
         document.getElementById('btn-show-register')?.addEventListener('click', () => {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('register-container').classList.remove('hidden');
@@ -513,226 +410,95 @@
             document.getElementById('register-container').classList.add('hidden');
             document.getElementById('login-container').classList.remove('hidden');
         });
-        document.getElementById('btn-back-to-login')?.addEventListener('click', () => {
-            document.getElementById('reset-code-container').classList.add('hidden');
-            document.getElementById('login-container').classList.remove('hidden');
-        });
 
-        function openForgotModal() { document.getElementById('forgot-modal').classList.remove('hidden'); document.getElementById('forgot-modal').classList.add('flex'); }
-        function closeForgotModal() { document.getElementById('forgot-modal').classList.add('hidden'); document.getElementById('forgot-modal').classList.remove('flex'); document.getElementById('forgot-form').reset(); }
-
-        // Pedir Recuperação de Senha
-        document.getElementById('forgot-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('forgot-email').value.trim().toLowerCase();
-            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            
-            if (!users[email] && email !== ADMIN_EMAIL) {
-                showNotification("Este e-mail não está registado no sistema.", true);
-                return;
-            }
-
-            const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            let recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
-            recoveryRequests[email] = { email, code: recoveryCode, date: new Date().toLocaleDateString('pt-PT') };
-            localStorage.setItem('pricekup_recovery_requests', JSON.stringify(recoveryRequests));
-
-            closeForgotModal();
-            
-            document.getElementById('login-container').classList.add('hidden');
-            document.getElementById('reset-code-container').classList.remove('hidden');
-            document.getElementById('res-email').value = email;
-            
-            showNotification("Código gerado! Solicite o código ao administrador.");
-            
-            if (currentUser && currentUser.email === ADMIN_EMAIL) {
-                loadAdminData();
-            }
-        });
-
-        // Validar código e redefinir senha a partir do ecrã principal
-        document.getElementById('reset-code-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('res-email').value.trim().toLowerCase();
-            const codeInput = document.getElementById('res-code').value.trim();
-            const newPassword = document.getElementById('res-new-password').value;
-
-            let recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
-            if (!recoveryRequests[email] || recoveryRequests[email].code !== codeInput) {
-                showNotification("Código de recuperação inválido!", true);
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            if (email === ADMIN_EMAIL && !users[ADMIN_EMAIL]) {
-                users[ADMIN_EMAIL] = { name: "Administrador PriceKup", email: ADMIN_EMAIL, password: newPassword };
-            } else if (users[email]) {
-                users[email].password = newPassword;
-            }
-            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
-
-            delete recoveryRequests[email];
-            localStorage.setItem('pricekup_recovery_requests', JSON.stringify(recoveryRequests));
-
-            document.getElementById('reset-code-container').classList.add('hidden');
-            document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('reset-code-form').reset();
-            showNotification("Senha alterada com sucesso! Já pode entrar.");
-        });
-
-        // Atualizar Perfil
-        document.getElementById('profile-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newName = document.getElementById('prof-name').value.trim();
-            const newPassword = document.getElementById('prof-password').value;
-
-            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            
-            // Atualiza os dados do utilizador atual
-            currentUser.name = newName;
-            if (newPassword) {
-                currentUser.password = newPassword;
-            }
-
-            // Grava na base de dados (localStorage)
-            users[currentUser.email] = currentUser;
-            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
-            localStorage.setItem('pricekup_active_user', JSON.stringify(currentUser));
-
-            // Atualiza Interface
-            document.getElementById('user-display-name').textContent = currentUser.name;
-            document.getElementById('prof-password').value = ''; // Limpa o campo da senha
-            
-            showNotification("Perfil atualizado com sucesso!");
-        });
-
-        // Registo
-        document.getElementById('register-form').addEventListener('submit', (e) => {
+        // Registo via Supabase Auth
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
 
-            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            if (users[email]) {
-                showNotification("Este e-mail já tem conta criada!", true);
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { business_name: name } }
+            });
+
+            if (error) {
+                showNotification(error.message, true);
                 return;
             }
 
-            users[email] = { name, email, password };
-            localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
-            showNotification("Conta criada com sucesso! Faça login.");
-            
+            showNotification("Conta criada! Já pode iniciar sessão.");
             document.getElementById('register-container').classList.add('hidden');
             document.getElementById('login-container').classList.remove('hidden');
             document.getElementById('register-form').reset();
         });
 
-        // Login
-        document.getElementById('login-form').addEventListener('submit', (e) => {
+        // Login via Supabase Auth
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
-            let users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            
-            if (email === ADMIN_EMAIL && !users[ADMIN_EMAIL]) {
-                users[ADMIN_EMAIL] = { name: "Administrador PriceKup", email: ADMIN_EMAIL, password: ADMIN_DEFAULT_PASSWORD };
-                localStorage.setItem('pricekup_strict_users', JSON.stringify(users));
-            }
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            if (!users[email]) {
-                showNotification("Erro: Conta não encontrada. Registe-se primeiro!", true);
-                return;
-            }
-            if (users[email].password !== password) {
-                showNotification("Erro: Senha incorreta!", true);
+            if (error) {
+                showNotification("Erro: " + error.message, true);
                 return;
             }
 
-            currentUser = users[email];
-            localStorage.setItem('pricekup_active_user', JSON.stringify(currentUser));
+            currentUser = data.user;
             startApp();
         });
 
-        function startApp() {
+        async function startApp() {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             
-            // Popula dados do utilizador na UI
-            document.getElementById('user-display-name').textContent = currentUser.name;
+            const businessName = currentUser.user_metadata?.business_name || "Meu Negócio";
+            document.getElementById('user-display-name').textContent = businessName;
             document.getElementById('user-display-email').textContent = currentUser.email;
             
-            // Popula dados no formulário de Perfil
-            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-name').value = businessName;
             document.getElementById('prof-email').value = currentUser.email;
 
-            const adminNav = document.getElementById('nav-admin');
-            if (currentUser.email === ADMIN_EMAIL) {
-                adminNav.classList.remove('hidden');
-                loadAdminData();
-            } else {
-                adminNav.classList.add('hidden');
-            }
-
-            loadUserData();
-            showNotification(`Sessão iniciada como ${currentUser.name}!`);
+            await loadUserData();
+            showNotification(`Sessão iniciada com sucesso!`);
         }
 
-        function loadAdminData() {
-            const users = JSON.parse(localStorage.getItem('pricekup_strict_users')) || {};
-            const adminTable = document.getElementById('admin-users-table');
-            const userKeys = Object.keys(users);
-            
-            if (userKeys.length === 0) {
-                adminTable.innerHTML = '<tr><td colspan="2" class="p-6 text-center text-slate-400">Nenhum utilizador encontrado.</td></tr>';
-            } else {
-                adminTable.innerHTML = userKeys.map(email => {
-                    const u = users[email];
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-4 font-medium text-slate-900">${u.name}</td>
-                            <td class="p-4 text-slate-600">${u.email}</td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            const recoveryRequests = JSON.parse(localStorage.getItem('pricekup_recovery_requests')) || {};
-            const recoveryTable = document.getElementById('admin-recovery-table');
-            const reqKeys = Object.keys(recoveryRequests);
-
-            if (reqKeys.length === 0) {
-                recoveryTable.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400">Nenhum pedido pendente.</td></tr>';
-            } else {
-                recoveryTable.innerHTML = reqKeys.map(email => {
-                    const req = recoveryRequests[email];
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-4 font-medium text-slate-900">${req.email}</td>
-                            <td class="p-4"><span class="bg-purple-100 text-purple-700 font-mono font-bold px-2.5 py-1 rounded-lg">${req.code}</span></td>
-                            <td class="p-4 text-right">
-                                <span class="text-xs text-slate-500 font-medium">Copie e envie por e-mail</span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            localStorage.removeItem('pricekup_active_user');
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
             currentUser = null;
             document.getElementById('app-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('login-form').reset();
-            // Reseta a tab para o dashboard na próxima vez
-            switchTab('dashboard'); 
+            switchTab('dashboard');
             showNotification("Sessão terminada.");
         });
 
-        // Modais Padrão
+        // Atualizar Perfil
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('prof-name').value.trim();
+            const newPassword = document.getElementById('prof-password').value;
+
+            let updates = { data: { business_name: newName } };
+            if (newPassword) updates.password = newPassword;
+
+            const { error } = await supabaseClient.auth.updateUser(updates);
+            if (error) {
+                showNotification("Erro ao atualizar perfil.", true);
+                return;
+            }
+
+            document.getElementById('user-display-name').textContent = newName;
+            document.getElementById('prof-password').value = '';
+            showNotification("Perfil atualizado com sucesso!");
+        });
+
+        // Modais
         function openIngredientModal() { document.getElementById('ingredient-modal').classList.remove('hidden'); document.getElementById('ingredient-modal').classList.add('flex'); }
         function closeIngredientModal() { document.getElementById('ingredient-modal').classList.add('hidden'); document.getElementById('ingredient-modal').classList.remove('flex'); document.getElementById('ingredient-form').reset(); }
         
@@ -742,42 +508,48 @@
         function openSaleModal() { document.getElementById('sale-modal').classList.remove('hidden'); document.getElementById('sale-modal').classList.add('flex'); }
         function closeSaleModal() { document.getElementById('sale-modal').classList.add('hidden'); document.getElementById('sale-modal').classList.remove('flex'); document.getElementById('sale-form').reset(); }
 
-        function getUserKey(key) {
-            return `pricekup_${currentUser.email}_${key}`;
-        }
+        // CARREGAR DADOS DO SUPABASE
+        async function loadUserData() {
+            // 1. Ingredientes
+            const { data: ingredients } = await supabaseClient.from('ingredients').select('*').eq('user_id', currentUser.id);
+            // 2. Receitas
+            const { data: recipes } = await supabaseClient.from('recipes').select('*').eq('user_id', currentUser.id);
+            // 3. Vendas
+            const { data: sales } = await supabaseClient.from('sales').select('*').eq('user_id', currentUser.id);
 
-        function loadUserData() {
-            const ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
-            const recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
-            const sales = JSON.parse(localStorage.getItem(getUserKey('sales'))) || [];
+            const ingList = ingredients || [];
+            const recList = recipes || [];
+            const salesList = sales || [];
 
-            document.getElementById('stat-ingredients').textContent = ingredients.length;
-            document.getElementById('stat-recipes').textContent = recipes.length;
-            document.getElementById('stat-sales').textContent = sales.length;
+            document.getElementById('stat-ingredients').textContent = ingList.length;
+            document.getElementById('stat-recipes').textContent = recList.length;
+            document.getElementById('stat-sales').textContent = salesList.length;
 
+            // Renderizar Tabela de Ingredientes
             const ingBody = document.getElementById('ingredients-table-body');
-            if (ingredients.length === 0) {
+            if (ingList.length === 0) {
                 ingBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhum ingrediente registado.</td></tr>';
             } else {
-                ingBody.innerHTML = ingredients.map((ing, index) => `
+                ingBody.innerHTML = ingList.map(ing => `
                     <tr class="hover:bg-slate-50">
                         <td class="p-4 font-medium text-slate-900">${ing.name}</td>
                         <td class="p-4 text-slate-600">${ing.pkg}</td>
                         <td class="p-4 text-slate-600">R$ ${parseFloat(ing.price).toFixed(2)}</td>
-                        <td class="p-4 text-right"><button onclick="deleteIngredient(${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button></td>
+                        <td class="p-4 text-right"><button onclick="deleteIngredient('${ing.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button></td>
                     </tr>
                 `).join('');
             }
 
+            // Renderizar Grid de Receitas
             const recGrid = document.getElementById('recipes-grid');
-            if (recipes.length === 0) {
+            if (recList.length === 0) {
                 recGrid.innerHTML = '<div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 col-span-full text-center text-slate-400 py-10">Nenhuma ficha técnica criada.</div>';
             } else {
-                recGrid.innerHTML = recipes.map((rec, index) => `
+                recGrid.innerHTML = recList.map(rec => `
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-3">
                         <div class="flex justify-between items-start">
                             <h4 class="font-bold text-slate-900 text-lg">${rec.name}</h4>
-                            <button onclick="deleteRecipe(${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button>
+                            <button onclick="deleteRecipe('${rec.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Excluir</button>
                         </div>
                         <div class="grid grid-cols-2 gap-4 pt-2 text-sm">
                             <div class="bg-slate-50 p-3 rounded-xl">
@@ -793,87 +565,84 @@
                 `).join('');
             }
 
+            // Renderizar Tabela de Vendas
             const salesBody = document.getElementById('sales-table-body');
-            if (sales.length === 0) {
+            if (salesList.length === 0) {
                 salesBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Nenhuma venda registada.</td></tr>';
             } else {
-                salesBody.innerHTML = sales.map((sale, index) => `
+                salesBody.innerHTML = salesList.map(sale => `
                     <tr class="hover:bg-slate-50">
                         <td class="p-4 font-medium text-slate-900">${sale.item}</td>
                         <td class="p-4 text-slate-600">${sale.qty}</td>
                         <td class="p-4 font-semibold text-emerald-600">R$ ${parseFloat(sale.total).toFixed(2)}</td>
-                        <td class="p-4 text-right text-slate-400 text-xs">${sale.date}</td>
+                        <td class="p-4 text-right text-slate-400 text-xs">${new Date(sale.created_at).toLocaleDateString('pt-PT')}</td>
                     </tr>
                 `).join('');
             }
         }
 
-        document.getElementById('ingredient-form').addEventListener('submit', (e) => {
+        // ADICIONAR INGREDIENTE
+        document.getElementById('ingredient-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('ing-name').value.trim();
             const pkg = document.getElementById('ing-pkg').value;
             const price = document.getElementById('ing-price').value;
 
-            let ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
-            ingredients.push({ name, pkg, price });
-            localStorage.setItem(getUserKey('ingredients'), JSON.stringify(ingredients));
+            const { error } = await supabaseClient.from('ingredients').insert([{ name, pkg, price, user_id: currentUser.id }]);
+            if (error) { showNotification("Erro ao guardar ingrediente.", true); return; }
 
             closeIngredientModal();
             loadUserData();
             showNotification("Ingrediente adicionado com sucesso!");
         });
 
-        function deleteIngredient(index) {
-            let ingredients = JSON.parse(localStorage.getItem(getUserKey('ingredients'))) || [];
-            ingredients.splice(index, 1);
-            localStorage.setItem(getUserKey('ingredients'), JSON.stringify(ingredients));
+        async function deleteIngredient(id) {
+            await supabaseClient.from('ingredients').delete().eq('id', id);
             loadUserData();
             showNotification("Ingrediente removido.");
         }
 
-        document.getElementById('recipe-form').addEventListener('submit', (e) => {
+        // ADICIONAR FICHA TÉCNICA
+        document.getElementById('recipe-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('rec-name').value.trim();
             const cost = document.getElementById('rec-cost').value;
             const price = document.getElementById('rec-price').value;
 
-            let recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
-            recipes.push({ name, cost, price });
-            localStorage.setItem(getUserKey('recipes'), JSON.stringify(recipes));
+            const { error } = await supabaseClient.from('recipes').insert([{ name, cost, price, user_id: currentUser.id }]);
+            if (error) { showNotification("Erro ao guardar ficha técnica.", true); return; }
 
             closeRecipeModal();
             loadUserData();
             showNotification("Ficha técnica criada com sucesso!");
         });
 
-        function deleteRecipe(index) {
-            let recipes = JSON.parse(localStorage.getItem(getUserKey('recipes'))) || [];
-            recipes.splice(index, 1);
-            localStorage.setItem(getUserKey('recipes'), JSON.stringify(recipes));
+        async function deleteRecipe(id) {
+            await supabaseClient.from('recipes').delete().eq('id', id);
             loadUserData();
             showNotification("Ficha técnica removida.");
         }
 
-        document.getElementById('sale-form').addEventListener('submit', (e) => {
+        // ADICIONAR VENDA
+        document.getElementById('sale-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const item = document.getElementById('sale-item').value.trim();
             const qty = document.getElementById('sale-qty').value;
             const total = document.getElementById('sale-total').value;
-            const date = new Date().toLocaleDateString('pt-PT');
 
-            let sales = JSON.parse(localStorage.getItem(getUserKey('sales'))) || [];
-            sales.push({ item, qty, total, date });
-            localStorage.setItem(getUserKey('sales'), JSON.stringify(sales));
+            const { error } = await supabaseClient.from('sales').insert([{ item, qty, total, user_id: currentUser.id }]);
+            if (error) { showNotification("Erro ao registar venda.", true); return; }
 
             closeSaleModal();
             loadUserData();
             showNotification("Venda registada com sucesso!");
         });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const activeUser = JSON.parse(localStorage.getItem('pricekup_active_user'));
-            if (activeUser) {
-                currentUser = activeUser;
+        // Verificar sessão ao carregar a página
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data } = await supabaseClient.auth.getSession();
+            if (data.session) {
+                currentUser = data.session.user;
                 startApp();
             }
         });
